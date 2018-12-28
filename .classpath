@@ -5,5 +5,7 @@
 	<classpathentry kind="lib" path="C:/the-one-1.6.0/lib/DTNConsoleConnection.jar"/>
 	<classpathentry kind="lib" path="C:/the-one-1.6.0/lib/ECLA.jar"/>
 	<classpathentry kind="lib" path="C:/Users/EPC/Downloads/junit-4.13-beta-1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/EPC2/SnorlaxSimulator/lib/DTNConsoleConnection.jar"/>
+	<classpathentry kind="lib" path="C:/Users/EPC2/SnorlaxSimulator/lib/ECLA.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
