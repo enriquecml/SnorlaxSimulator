@@ -17,7 +17,7 @@ public class State {
 }
 
 class Sleep extends State {
-    public void execute() {
+    public void execute(DTNHost dtn) {
         System.out.println("Sleeping");
     }
 }
