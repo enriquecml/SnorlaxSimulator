@@ -4,7 +4,7 @@ import core.DTNHost;
 
 public class StatesMachine {
 
-    private State[] states = {new mainFunction(), new Receive(), new Scan(),new Send(),new otherTasks(),new Sleep()};
+    private State[] states = {new mainFunction(),new Send(), new Receive(), new Scan(),new otherTasks(),new Sleep()};
 
     private int current = 0;
 
