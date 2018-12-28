@@ -8,9 +8,10 @@ public class schedulerSnorlaxNode {
 	private DTNHost dtn;
 	private StatesMachine sm;
 	
-	public schedulerSnorlaxNode() {
+	public schedulerSnorlaxNode(DTNHost _dtn) {
 	
 		sm = new StatesMachine();
+		dtn = _dtn;
 	}
 	
 	private boolean timeOfMainFunction() {
