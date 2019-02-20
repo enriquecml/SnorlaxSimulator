@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import interfaces.SimpleBroadcastPeriodInterface;
 import movement.MovementModel;
 import movement.Path;
 import routing.MessageRouter;
@@ -36,6 +37,27 @@ public class DTNHost implements Comparable<DTNHost> {
 	private ModuleCommunicationBus comBus;
 
 	private schedulerSnorlaxNode schedulerNode;
+	
+	public schedulerSnorlaxNode getSchedulerNode() {
+		return schedulerNode;
+	}
+
+	public void setSchedulerNode(schedulerSnorlaxNode schedulerNode) {
+		this.schedulerNode = schedulerNode;
+	}
+
+	//1. Details management in node
+	private Detail node_detail;
+	private List<Detail> details_list;
+	
+	//3. Encounters
+	private List<Integer> encounter_node;
+	private List<Integer> encounter_time;
+	private List<Integer> rates_node;
+
+	//5. Internal time
+	private int internal_node_time;
+	
 	
 	static {
 		DTNSim.registerForReset(DTNHost.class.getCanonicalName());
@@ -91,6 +113,10 @@ public class DTNHost implements Comparable<DTNHost> {
 				l.initialLocation(this, this.location);
 			}
 		}
+		
+		//2. Details management
+		this.details_list = new ArrayList<>();
+		this.node_detail = new Detail(this.address, 1000, 5000);
 	}
 	
 	/**
@@ -177,9 +203,15 @@ public class DTNHost implements Comparable<DTNHost> {
 	 */
 	public List<Connection> getConnections() {
 		List<Connection> lc = new ArrayList<Connection>();
+		List<Connection> tmp = new ArrayList<Connection>();
 
 		for (NetworkInterface i : net) {
-			lc.addAll(i.getConnections());
+			tmp.addAll(i.getConnections());
+			for(Connection c:tmp) {
+				if(c.toNode.getAddress()==schedulerNode.getNext_node()) {
+					lc.add(c);
+				}
+			}
 		}
 
 		return lc;
@@ -332,6 +364,7 @@ public class DTNHost implements Comparable<DTNHost> {
 	 */
 	public void update(boolean simulateConnections) {
 		schedulerNode.execute();
+		/*
 		if (!isRadioActive()) {
 			// Make sure inactive nodes don't have connections
 			tearDownAllConnections();
@@ -343,7 +376,29 @@ public class DTNHost implements Comparable<DTNHost> {
 				i.update();
 			}
 		}
-		this.router.update();
+		this.router.update();*/
+	}
+	
+	public void scan() {		
+		List<Connection> lc = new ArrayList<Connection>();
+		List<Connection> tmp = new ArrayList<Connection>();
+
+		for (NetworkInterface i : net) {
+			i.update();
+			tmp.addAll(i.getConnections());
+			for(Connection c:tmp) {
+				if(encounter_node.indexOf(c.toNode.getAddress()) != -1 ){
+					encounter_time.set(encounter_node.indexOf(c.toNode.getAddress()), SimClock.getInstance().getIntTime()-internal_node_time);
+				}
+				else {
+					encounter_node.add(c.toNode.getAddress());
+					encounter_time.add(SimClock.getInstance().getIntTime()-internal_node_time);
+					rates_node.add(0);
+				}
+			}
+			tearDownAllConnections();
+		}
+		
 	}
 	
 	/** 
@@ -536,6 +591,62 @@ public class DTNHost implements Comparable<DTNHost> {
 	 */
 	public int compareTo(DTNHost h) {
 		return this.getAddress() - h.getAddress();
+	}
+
+	public Detail getNode_detail() {
+		return node_detail;
+	}
+
+	public void setNode_detail(Detail node_detail) {
+		this.node_detail = node_detail;
+	}
+
+	public List<Detail> getDetails_list() {
+		return details_list;
+	}
+
+	public void setDetails_list(List<Detail> details_list) {
+		this.details_list = details_list;
+	}
+
+	public boolean canDeleteMessage(Message m) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public int getInternal_node_time() {
+		return internal_node_time;
+	}
+
+	public void setInternal_node_time(int internal_node_time) {
+		this.internal_node_time = internal_node_time;
+	}
+
+	public List<Integer> getEncounter_node() {
+		return encounter_node;
+	}
+
+	public void setEncounter_node(List<Integer> encounter_node) {
+		this.encounter_node = encounter_node;
+	}
+
+	public List<Integer> getEncounter_time() {
+		return encounter_time;
+	}
+
+	public void setEncounter_time(List<Integer> encounter_time) {
+		this.encounter_time = encounter_time;
+	}
+	
+	public void up_first_interface() {
+		NetworkInterface n = this.net.get(0);
+		SimpleBroadcastPeriodInterface s = (SimpleBroadcastPeriodInterface) n;
+		s.up();
+	}
+
+	public List<Integer> getRates_node() {
+		// TODO Auto-generated method stub
+		return rates_node;
 	}
 
 }

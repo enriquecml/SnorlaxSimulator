@@ -57,6 +57,11 @@ public class World {
 	private ScheduledUpdatesQueue scheduledUpdates;
 	private boolean simulateConOnce;
 
+	//2. All details in simulation
+	private List<Detail> all_details;
+	
+	
+	
 	/**
 	 * Constructor.
 	 */
@@ -77,6 +82,9 @@ public class World {
 
 		setNextEventQueue();
 		initSettings();
+		
+		//3. All details in simulation
+		this.all_details = new ArrayList<>();
 	}
 
 	/**
@@ -165,10 +173,26 @@ public class World {
 		simClock.setTime(runUntil);
 
 		updateHosts();
+		
+		//5. Execute the details update
+		this.update_node_details();
 
 		/* inform all update listeners */
 		for (UpdateListener ul : this.updateListeners) {
 			ul.updated(this.hosts);
+		}
+	}
+	
+	//4. Update all node_details
+	public void update_node_details() {
+		this.all_details.clear();
+		//Recolecting details from all nodes
+		for(int index=0;index<this.hosts.size();index++) {
+			this.all_details.add(this.hosts.get(index).getNode_detail());
+		}
+		//Updating detail list in each node
+		for(int index=0;index<this.hosts.size();index++) {
+			this.hosts.get(index).setDetails_list(this.all_details);
 		}
 	}
 

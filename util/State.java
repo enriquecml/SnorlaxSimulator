@@ -1,6 +1,7 @@
 package util;
 
 import core.DTNHost;
+import core.Message;
 
 public class State {
 
@@ -24,6 +25,7 @@ class Sleep extends State {
 
 class Scan extends State {
     public void execute(DTNHost dtn) {
+    	dtn.scan();
         System.out.println("Scanning");
     }
 }
@@ -31,12 +33,16 @@ class Scan extends State {
 class Send extends State {
     public void execute(DTNHost dtn) {
         System.out.println("Sending Messages");
+        int next_node = dtn.getSchedulerNode().getNext_node();
+        
     }
 }
 
 class mainFunction extends State {
+	private int i=1;
     public void execute(DTNHost dtn) {
         System.out.println("executing main function");
+        dtn.createNewMessage(new Message(dtn,null,dtn.getAddress()+":"+i,1024));
     }
 }
 

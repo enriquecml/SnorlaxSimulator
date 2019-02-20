@@ -143,4 +143,10 @@ public class SimpleBroadcastPeriodInterface extends NetworkInterface {
 		return "SimpleBroadcastInterface " + super.toString();
 	}
 
+
+	public void up() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

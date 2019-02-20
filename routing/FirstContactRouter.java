@@ -15,6 +15,7 @@ import core.Settings;
  */
 public class FirstContactRouter extends ActiveRouter {
 	
+	private DTNHost dtn;
 	/**
 	 * Constructor. Creates a new message router based on the settings in
 	 * the given Settings object.
@@ -45,6 +46,8 @@ public class FirstContactRouter extends ActiveRouter {
 		
 		return recvCheck;
 	}
+	
+	
 			
 	@Override
 	public void update() {
@@ -70,5 +73,31 @@ public class FirstContactRouter extends ActiveRouter {
 	public FirstContactRouter replicate() {
 		return new FirstContactRouter(this);
 	}
-
+	
+	@Override
+	protected int startTransfer(Message m, Connection con) {
+		int retVal;
+		
+		if (!con.isReadyForTransfer()) {
+			return TRY_LATER_BUSY;
+		}
+		
+		if (!super.policy.acceptSending(getHost(), 
+				con.getOtherNode(getHost()), con, m)) {
+			return MessageRouter.DENIED_POLICY;
+		}
+		
+		retVal = con.startTransfer(getHost(), m);
+		if (retVal == RCV_OK) { // started transfer
+			addToSendingConnections(con);
+		}
+		else if (deleteDelivered && retVal == DENIED_OLD && 
+				m.getTo() == con.getOtherNode(this.getHost())) {
+			//borrar si se ha enviado a todos los vecinos de la lista del nodo que realiza el envío
+			if(dtn.canDeleteMessage(m))
+				this.deleteMessage(m.getId(), false);
+		}
+		
+		return retVal;
+	}
 }

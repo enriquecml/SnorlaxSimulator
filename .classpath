@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" path=""/>
-	<classpathentry kind="lib" path="C:/the-one-1.6.0/lib/DTNConsoleConnection.jar"/>
-	<classpathentry kind="lib" path="C:/the-one-1.6.0/lib/ECLA.jar"/>
-	<classpathentry kind="lib" path="C:/Users/EPC2/Downloads/junit-4.13-beta-1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/EPC2/SnorlaxSimulator/lib/DTNConsoleConnection.jar"/>
-	<classpathentry kind="lib" path="C:/Users/EPC2/SnorlaxSimulator/lib/ECLA.jar"/>
+	<classpathentry kind="lib" path="/Users/me/git/SnorlaxSimulator/lib/DTNConsoleConnection.jar"/>
+	<classpathentry kind="lib" path="/Users/me/git/SnorlaxSimulator/lib/ECLA.jar"/>
+	<classpathentry kind="lib" path="/Users/me/git/SnorlaxSimulator/lib/junit-4.13-beta-1.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
