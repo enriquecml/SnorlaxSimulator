@@ -11,8 +11,16 @@ import routing.MessageRouter;
  */
 public abstract class Connection {
 	protected DTNHost toNode;
+	public DTNHost getToNode() {
+		return toNode;
+	}
+
 	protected NetworkInterface toInterface;
 	protected DTNHost fromNode;
+	public DTNHost getFromNode() {
+		return fromNode;
+	}
+
 	protected NetworkInterface fromInterface;
 	protected DTNHost msgFromNode;
 
@@ -226,5 +234,7 @@ public abstract class Connection {
 				" from " + this.msgFromNode : "");
 	}
 
+	
+	
 }
 

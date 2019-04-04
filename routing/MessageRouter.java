@@ -485,6 +485,8 @@ public abstract class MessageRouter {
 	 * because it was delivered to final destination.  
 	 */
 	public void deleteMessage(String id, boolean drop) {
+		if(drop)
+			System.out.println("drop");
 		Message removed = removeFromMessages(id); 
 		if (removed == null) throw new SimError("no message for id " +
 				id + " to remove at " + this.host);

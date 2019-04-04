@@ -19,8 +19,8 @@ import core.SimClock;
 public class SimpleBroadcastPeriodInterface extends NetworkInterface {
 	
 	
-	public int period;
-	public int time_active;
+
+	public boolean active;
 	
 	/**
 	 * Reads the interface settings from the Settings file
@@ -28,8 +28,7 @@ public class SimpleBroadcastPeriodInterface extends NetworkInterface {
 	public SimpleBroadcastPeriodInterface(Settings s)	{
 		super(s);
 		System.out.println("Inicio");
-		period = 60;
-		time_active = 10;
+		active = false;
 	}
 		
 	/**
@@ -38,8 +37,7 @@ public class SimpleBroadcastPeriodInterface extends NetworkInterface {
 	 */
 	public SimpleBroadcastPeriodInterface(SimpleBroadcastPeriodInterface ni) {
 		super(ni);
-		period = 60;
-		time_active = 10;
+		active = false;
 	}
 
 	public NetworkInterface replicate()	{
@@ -47,14 +45,7 @@ public class SimpleBroadcastPeriodInterface extends NetworkInterface {
 	}
 
 	public boolean isActive() {
-		System.out.println("Despues"+time_active);
-
-		SimClock clock_now = SimClock.getInstance();
-		
-		int time_now = clock_now.getIntTime()%period;
-		
-		
-		return time_now < time_active;
+		return active;
 		
 	}
 	
@@ -100,7 +91,7 @@ public class SimpleBroadcastPeriodInterface extends NetworkInterface {
 			// all connections should be up at this stage
 			assert con.isUp() : "Connection " + con + " was down!";
 
-			if (!isWithinRange(anotherInterface)) {
+			if (!isWithinRange(anotherInterface) && !anotherInterface.isActive()) {
 				disconnect(con,anotherInterface);
 				connections.remove(i);
 			}
@@ -114,6 +105,41 @@ public class SimpleBroadcastPeriodInterface extends NetworkInterface {
 		for (NetworkInterface i : interfaces) {
 			connect(i);
 		}
+	}
+	
+	public boolean tryConnect(int address) {//address -> to 
+		if (optimizer == null) {
+			return false; /* nothing to do */
+		}
+		
+		// First break the old ones
+		optimizer.updateLocation(this);
+		for (int i=0; i<this.connections.size(); ) {
+			Connection con = this.connections.get(i);
+			NetworkInterface anotherInterface = con.getOtherInterface(this);
+
+			// all connections should be up at this stage
+			assert con.isUp() : "Connection " + con + " was down!";
+
+			if (!isWithinRange(anotherInterface) || !anotherInterface.isActive()) {
+				disconnect(con,anotherInterface);
+				connections.remove(i);
+			}
+			else {
+				i++;
+			}
+		}
+		// Then find new possible connections
+		Collection<NetworkInterface> interfaces =
+			optimizer.getNearInterfaces(this);
+		for (NetworkInterface i : interfaces) {
+			if(i.getHost().getAddress() == address) {
+				connect(i);
+				return true;
+				
+			}
+		}
+		return false;
 	}
 
 	/** 
@@ -145,8 +171,15 @@ public class SimpleBroadcastPeriodInterface extends NetworkInterface {
 
 
 	public void up() {
-		// TODO Auto-generated method stub
-		
+		active = true;		
+	}
+
+	public void down() {
+		active = false;		
+	}
+	
+	public boolean isScanning() {
+		return true;
 	}
 
 }

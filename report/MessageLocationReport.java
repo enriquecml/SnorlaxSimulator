@@ -39,7 +39,7 @@ public class MessageLocationReport extends Report implements UpdateListener {
 	public MessageLocationReport() {
 		Settings settings = getSettings();
 		this.lastUpdate = 0;	
-		this.granularity = settings.getInt(GRANULARITY);
+		this.granularity = 1;
 		
 		if (settings.contains(REPORTED_MESSAGES)) {
 			this.reportedMessages = new HashSet<String>();

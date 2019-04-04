@@ -23,7 +23,16 @@ public class Message implements Comparable<Message> {
 	/** Size of the message (bytes) */
 	private int size;
 	/** List of nodes this message has passed */
-	private List<DTNHost> path; 
+	private List<DTNHost> path;
+	private List<Integer> sent;//list of nodes have received this message
+	public void setSent(List<Integer> sent) {
+		this.sent = sent;
+	}
+
+	public List<Integer> getSent() {
+		return sent;
+	}
+
 	/** Next unique identifier to be given */
 	private static int nextUniqueId;
 	/** Unique ID of this message */
@@ -68,6 +77,7 @@ public class Message implements Comparable<Message> {
 		this.id = id;
 		this.size = size;
 		this.path = new ArrayList<DTNHost>();
+		this.sent = new ArrayList<Integer>();
 		this.uniqueId = nextUniqueId;
 		
 		this.timeCreated = SimClock.getTime();

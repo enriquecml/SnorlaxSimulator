@@ -7,6 +7,7 @@ package core;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import interfaces.SimpleBroadcastPeriodInterface;
 import movement.MovementModel;
@@ -55,8 +56,18 @@ public class DTNHost implements Comparable<DTNHost> {
 	private List<Integer> encounter_time;
 	private List<Integer> rates_node;
 
+	private List<Message> messages;
+
 	//5. Internal time
 	private int internal_node_time;
+	
+	private int start_delay;
+	
+	private int exit_state;
+	
+	private int receiveds;
+	
+	private int sents;
 	
 	
 	static {
@@ -84,7 +95,9 @@ public class DTNHost implements Comparable<DTNHost> {
 		this.address = getNextAddress();
 		this.name = groupId+address;
 		this.net = new ArrayList<NetworkInterface>();
-
+		this.encounter_node = new ArrayList<Integer>();
+		this.encounter_time = new ArrayList<Integer>();
+		this.rates_node = new ArrayList<Integer>();
 		for (NetworkInterface i : interf) {
 			NetworkInterface ni = i.replicate();
 			ni.setHost(this);
@@ -116,7 +129,13 @@ public class DTNHost implements Comparable<DTNHost> {
 		
 		//2. Details management
 		this.details_list = new ArrayList<>();
-		this.node_detail = new Detail(this.address, 1000, 5000);
+		this.node_detail = new Detail(this.address, 16, 45);
+		
+		this.messages = new ArrayList<Message>();
+		this.start_delay = this.address;
+		this.receiveds=0;
+		this.sents=0;
+		this.internal_node_time = this.address ;
 	}
 	
 	/**
@@ -363,7 +382,8 @@ public class DTNHost implements Comparable<DTNHost> {
 	 * @param simulateConnections Should network layer be updated too
 	 */
 	public void update(boolean simulateConnections) {
-		schedulerNode.execute();
+		if(SimClock.getIntTime()>=internal_node_time)
+			schedulerNode.execute();
 		/*
 		if (!isRadioActive()) {
 			// Make sure inactive nodes don't have connections
@@ -387,13 +407,16 @@ public class DTNHost implements Comparable<DTNHost> {
 			i.update();
 			tmp.addAll(i.getConnections());
 			for(Connection c:tmp) {
+				
 				if(encounter_node.indexOf(c.toNode.getAddress()) != -1 ){
 					encounter_time.set(encounter_node.indexOf(c.toNode.getAddress()), SimClock.getInstance().getIntTime()-internal_node_time);
+					rates_node.set(encounter_node.indexOf(c.toNode.getAddress()), 0);
+
 				}
 				else {
 					encounter_node.add(c.toNode.getAddress());
 					encounter_time.add(SimClock.getInstance().getIntTime()-internal_node_time);
-					rates_node.add(0);
+					rates_node.add( 0);
 				}
 			}
 			tearDownAllConnections();
@@ -512,9 +535,16 @@ public class DTNHost implements Comparable<DTNHost> {
 
 		if (retVal == MessageRouter.RCV_OK) {
 			m.addNodeOnPath(this);	// add this node on the messages path
+	    	setRate(from.address,from.getReceiveds()/(from.getSents()+1));
+
+			receiveds++;
 		}
 
 		return retVal;	
+	}
+
+	public int getReceiveds() {
+		return receiveds;
 	}
 
 	/**
@@ -534,6 +564,12 @@ public class DTNHost implements Comparable<DTNHost> {
 	 */
 	public void messageTransferred(String id, DTNHost from) {
 		this.router.messageTransferred(id, from);
+
+		this.sents++;
+	}
+
+	public int getSents() {
+		return sents;
 	}
 
 	/**
@@ -609,9 +645,30 @@ public class DTNHost implements Comparable<DTNHost> {
 		this.details_list = details_list;
 	}
 
-	public boolean canDeleteMessage(Message m) {
-		// TODO Auto-generated method stub
+	public boolean containAddress(List<DTNHost> hops,int _address,int n) {
+		int saw = 0;
+		for(DTNHost dtnh:hops) {
+			if(dtnh.getAddress() == _address)
+				saw++;
+			if(saw>=n)
+				return true;
+		}
 		return false;
+	}
+	
+	public boolean canDeleteMessage(Message m) {
+		
+		if(containAddress(m.getHops(),address,2))
+			return true;
+		
+		for(int i=0;i< encounter_node.size();i++) {
+		
+			if(!(m.getSent().contains((Integer)encounter_node.get(i)) || containAddress(m.getHops(), encounter_node.get(i), 1))) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	public int getInternal_node_time() {
@@ -643,10 +700,75 @@ public class DTNHost implements Comparable<DTNHost> {
 		SimpleBroadcastPeriodInterface s = (SimpleBroadcastPeriodInterface) n;
 		s.up();
 	}
+	
+	public void down_first_interface() {
+		NetworkInterface n = this.net.get(0);
+		SimpleBroadcastPeriodInterface s = (SimpleBroadcastPeriodInterface) n;
+		s.down();
+	}
 
 	public List<Integer> getRates_node() {
 		// TODO Auto-generated method stub
 		return rates_node;
+	}
+
+	public boolean tryConnect(int next_node) {
+		// TODO Auto-generated method stub
+		NetworkInterface n = this.net.get(0);
+		SimpleBroadcastPeriodInterface s = (SimpleBroadcastPeriodInterface) n;
+		return s.tryConnect(next_node);
+	}
+	
+	public boolean exit() {
+		
+		return exit_state==SimClock.getInstance().getIntTime()-internal_node_time;
+	}
+
+	public int getExit_state() {
+		return exit_state;
+	}
+
+	public void setExit_state(int exit_state) {
+		this.exit_state = exit_state;
+	}
+
+	public List<Message> getMessages() {
+		return messages;
+	}
+
+	public void setMessages(List<Message> messages) {
+		this.messages = messages;
+	}
+
+	public void deleteEncounterNode(int next_node) {
+
+		for(int i=0;i<encounter_node.size();i++) {
+			
+			if(encounter_node.get(i)==next_node) {
+				encounter_node.remove(i);
+				encounter_time.remove(i);
+				rates_node.remove(i);
+				break;
+			}
+			
+		}
+		
+	}
+
+	public void setRate(int next_node, int rate) {
+		for(int i=0;i<encounter_node.size();i++) {
+			
+			if(encounter_node.get(i)==next_node) {
+				rates_node.set(i, rate);
+				break;
+			}
+			
+		}		
+	}
+
+	public void setSents(int i) {
+		// TODO Auto-generated method stub
+		sents++;
 	}
 
 }

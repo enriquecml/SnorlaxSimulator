@@ -8,7 +8,7 @@ public class Detail {
 	public Detail(int node_address, int time_on, int broadcast_periode) {
 		this.node_address = node_address;
 		this.time_on = time_on;
-		this.broadcast_periode = broadcast_periode;
+		this.broadcast_periode = 60;
 	}
 	
 	public int getNode_address() {
