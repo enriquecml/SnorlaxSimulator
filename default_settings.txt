@@ -7,7 +7,7 @@ Scenario.name = Test-15-nodes
 Scenario.simulateConnections = true
 Scenario.updateInterval = 1.0
 # 43200s == 12h
-Scenario.endTime = 10000
+Scenario.endTime = 100000
 Scenario.nrofHostGroups = 2
 
 
@@ -22,7 +22,7 @@ Scenario.nrofHostGroups = 2
 btInterface.type = SimpleBroadcastPeriodInterface
 # Transmit speed of 2 Mbps = 250kBps
 btInterface.transmitSpeed = 11264k
-btInterface.transmitRange = 30
+btInterface.transmitRange = 60
 
 
 ## Group-specific settings:
@@ -59,7 +59,7 @@ Group.groupID = n
 
 # Walking speeds
 Group2.speed = 0.0, 0.0
-Group2.nrofHosts = 6
+Group2.nrofHosts = 9
 Group2.groupID = s
 
 
@@ -68,7 +68,7 @@ Group2.groupID = s
 # seed for movement models' pseudo random number generator (default = 0)
 MovementModel.rngSeed = 1
 # World's size for Movement Models without implicit size (width, height; meters)
-MovementModel.worldSize = 15,10
+MovementModel.worldSize = 50,50
 # How long time to move hosts in the world before real simulation
 
 

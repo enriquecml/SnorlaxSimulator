@@ -24,7 +24,7 @@ public class schedulerSnorlaxNode {
 		n_messages_created = 0;
 		counter_announce_and_receive=0;
 		aleatorio= new Random(System.currentTimeMillis()*dtn.getAddress());
-		timescanned=60;
+		timescanned=616;
 	}
 	
 	private int internal_time_elapsed() {
@@ -32,7 +32,7 @@ public class schedulerSnorlaxNode {
 	}
 	
 	private boolean timeOfMainFunction() {
-		if(internal_time_elapsed() > (5 * n_messages_created)) {
+		if(internal_time_elapsed() > (800 * n_messages_created)) {
 			n_messages_created++;
 			return true;
 		}
@@ -44,7 +44,7 @@ public class schedulerSnorlaxNode {
 		List<Integer> nodes = dtn.getEncounter_node();
 		if(nodes.size()==0)
 			timescanned=0;
-		return nodes.size()==0 || timescanned<60;
+		return nodes.size()==0 || timescanned<616;
 	}
 	
 	private boolean timeOfSend() {
@@ -80,7 +80,7 @@ public class schedulerSnorlaxNode {
 	
 	private boolean timeOfAnnounceAndReceive() {
 		
-		if(counter_announce_and_receive >= 60) {
+		if(counter_announce_and_receive >= 600) {
 			counter_announce_and_receive=0;
 			return true;
 		}
@@ -92,6 +92,8 @@ public class schedulerSnorlaxNode {
 	}
 	
 	public void execute() {
+		aleatorio= new Random(System.currentTimeMillis()*dtn.getAddress());
+
 		counter_announce_and_receive++;
 		if(dtn.getExit_state()<internal_time_elapsed()) {
 		
@@ -102,7 +104,7 @@ public class schedulerSnorlaxNode {
 			sm.execute(dtn);
 		}
 		else if (timeOfSend()) {
-			dtn.setExit_state(internal_time_elapsed()+8);
+			dtn.setExit_state(internal_time_elapsed()+8+8*aleatorio.nextInt(2));
 			sm.next(1);
 			sm.execute(dtn);	
 		}
